@@ -10,6 +10,20 @@ npm run build      # проверка типов + сборка в dist/
 npm run watch      # пересборка при изменениях
 ```
 
+CI (`.github/workflows/ci.yml`) собирает проект на каждый push в любую ветку и на pull request; собранный `dist/` доступен в артефактах запуска.
+
+Релиз (`.github/workflows/release.yml`) запускается по semver-тегу:
+
+```bash
+make release              # v1.2.3 → v1.2.4
+make release BUMP=minor   # v1.2.3 → v1.3.0
+make release BUMP=major   # v1.2.3 → v2.0.0
+```
+
+`make release` работает только из `main` с чистым рабочим деревом, синхронизированным с `origin/main`. Последний тег берётся из GitHub через `gh`, новый тег ставится на текущий коммит и пушится. Если тегов ещё нет, используется версия из `package.json`. Pre-release можно выпустить вручную: `git tag v1.2.3-beta.1 && git push origin v1.2.3-beta.1`.
+
+Версия из тега проставляется в `package.json` и `manifest.json` (`version` — `1.2.3`, `version_name` — полная версия), а ZIP с расширением прикрепляется к GitHub Release.
+
 Установка: `chrome://extensions` → включить «Режим разработчика» → «Загрузить распакованное расширение» → выбрать папку `dist/`.
 
 ## Использование

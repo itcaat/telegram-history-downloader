@@ -1,0 +1,75 @@
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse semver tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          SEMVER_RE='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'
+          if [[ ! "$TAG" =~ $SEMVER_RE ]]; then
+            echo "::error::Tag '$TAG' is not a valid semver tag (expected vX.Y.Z[-prerelease][+build])"
+            exit 1
+          fi
+          echo "full=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "core=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}" >> "$GITHUB_OUTPUT"
+          if [[ -n "${BASH_REMATCH[4]}" ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Chrome only accepts numeric "version", so the full semver goes to "version_name".
+      - name: Set version
+        env:
+          VERSION_FULL: ${{ steps.version.outputs.full }}
+          VERSION_CORE: ${{ steps.version.outputs.core }}
+        run: |
+          npm version "$VERSION_FULL" --no-git-tag-version --allow-same-version
+          node -e '
+            const fs = require("node:fs");
+            const path = "public/manifest.json";
+            const manifest = JSON.parse(fs.readFileSync(path, "utf8"));
+            manifest.version = process.env.VERSION_CORE;
+            manifest.version_name = process.env.VERSION_FULL;
+            fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + "\n");
+          '
+
+      - run: npm run build
+
+      - name: Package extension
+        id: package
+        run: |
+          ZIP="telegram-history-downloader-${GITHUB_REF_NAME}.zip"
+          (cd dist && zip -r "../$ZIP" .)
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ZIP: ${{ steps.package.outputs.zip }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          FLAGS=(--title "$GITHUB_REF_NAME" --generate-notes --verify-tag)
+          if [[ "$PRERELEASE" == "true" ]]; then
+            FLAGS+=(--prerelease)
+          fi
+          gh release create "$GITHUB_REF_NAME" "$ZIP" "${FLAGS[@]}"
