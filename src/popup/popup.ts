@@ -82,7 +82,7 @@ const els = {
   maxSize: $<HTMLInputElement>('max-size'),
   formError: $('form-error'),
   start: $<HTMLButtonElement>('start'),
-  summary: $('summary'),
+  startLabel: $('start-label'),
   progress: $('progress'),
   statusIcon: $('status-icon'),
   status: $('status'),
@@ -194,15 +194,13 @@ function updateFormState() {
   els.dateTo.min = form.from;
   els.dateTo.max = today;
 
-  els.summary.textContent = summaryText(form);
+  els.startLabel.textContent = startLabel(form);
 }
 
-function summaryText(form: StoredForm) {
-  if(!form.formats.length) return t('summaryNoFormat');
-  const names = form.formats.map((f) => FORMAT_NAMES[f]).join(', ');
-  if(form.media.length) return t('summaryZipMedia', names);
-  if(form.formats.length > 1) return t('summaryZip', names);
-  return t('summaryFile', names);
+function startLabel(form: StoredForm) {
+  if(!form.formats.length) return t('download');
+  if(form.media.length || form.formats.length > 1) return t('downloadAs', 'ZIP');
+  return t('downloadAs', FORMAT_NAMES[form.formats[0]]);
 }
 
 const parseDay = (value: string, nextDay = false) => {
@@ -346,7 +344,7 @@ function renderHeader(chat: ChatInfo | null) {
   headerKey = key;
 
   if(!chat) {
-    els.title.textContent = t('extName');
+    els.title.textContent = t('appName');
     els.kind.textContent = '';
     els.kind.hidden = true;
     els.avatar.style.removeProperty('--c1');

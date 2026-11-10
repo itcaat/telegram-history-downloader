@@ -1,22 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#3fb4f2"/>
-      <stop offset="1" stop-color="#1f8fd6"/>
+      <stop offset="0" stop-color="#37bbfe"/>
+      <stop offset="1" stop-color="#007dbb"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fd36b"/>
+      <stop offset="1" stop-color="#2aa745"/>
     </linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
       <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity=".25"/>
     </filter>
   </defs>
 
-  <!-- 96×96 artwork with 16 px transparent padding -->
-  <rect x="16" y="16" width="96" height="96" rx="22" fill="url(#bg)" filter="url(#shadow)"/>
+  <!-- Circular icon: ~112 px diameter, as recommended for round store icons -->
+  <circle cx="62" cy="62" r="54" fill="url(#bg)" filter="url(#shadow)"/>
 
-  <path fill="#fff" d="M48 34h32a14 14 0 0 1 14 14v22a14 14 0 0 1-14 14H52l-13 10c-1.6 1.2-3.6-.3-3.1-2.2L38 82.3A14 14 0 0 1 34 72V48a14 14 0 0 1 14-14Z"/>
+  <!-- Paper plane -->
+  <path fill="#fff" transform="translate(21.5 22) scale(2.9)"
+    d="M21.4 4.3 2.9 11.4c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.5-1.3ZM17.6 8l-8 7.2-.3 3.3-1.5-4.8L17 7.4c.5-.3.9 0 .6.6Z"/>
 
-  <g fill="none" stroke="#1f8fd6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M64 44v22"/>
-    <path d="M54.5 57 64 66.5 73.5 57"/>
-    <path d="M52 75h24"/>
+  <!-- Download badge -->
+  <circle cx="98" cy="98" r="25" fill="#fff"/>
+  <circle cx="98" cy="98" r="21" fill="url(#badge)"/>
+  <g fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M98 87v15"/>
+    <path d="m91 96 7 7 7-7"/>
+    <path d="M90 109h16"/>
   </g>
 </svg>

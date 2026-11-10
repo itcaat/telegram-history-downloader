@@ -1,6 +1,7 @@
 {
-  "extName": {"message": "Telegram History Downloader"},
-  "extDescription": {"message": "Export chat, group and channel history from Telegram Web (WebK) to JSON, HTML and Markdown."},
+  "extName": {"message": "Chat Export for Telegram Web — HTML, JSON, MD"},
+  "appName": {"message": "Chat Export for Telegram"},
+  "extDescription": {"message": "Export Telegram Web chat, group and channel history to HTML, JSON or Markdown — with photos, videos and files. Runs in your browser."},
 
   "connecting": {"message": "Connecting to Telegram…"},
 
@@ -28,8 +29,7 @@
   "lastCount": {"message": "Number of messages"},
   "rangeDates": {"message": "Date range"},
   "dateFrom": {"message": "From"},
-  "dateTo": {"message": "To (inclusive)"},
-  "datesHint": {"message": "You can set just one of the dates."},
+  "dateTo": {"message": "to"},
 
   "formatsTitle": {"message": "Format"},
 
@@ -41,16 +41,13 @@
   "mediaFile": {"message": "Files"},
   "mediaSticker": {"message": "Stickers"},
   "maxFileSize": {"message": "Skip files larger than"},
-  "maxFileSizeHint": {"message": "0 = no limit. Larger files will be skipped."},
+  "maxFileSizeHint": {"message": "0 = no limit; larger files are skipped"},
   "kb": {"message": "KB"},
   "mb": {"message": "MB"},
   "gb": {"message": "GB"},
 
+  "downloadAs": {"message": "Download $FMT$", "placeholders": {"fmt": {"content": "$1"}}},
   "download": {"message": "Download"},
-  "summaryFile": {"message": "Saves a single $FMT$ file", "placeholders": {"fmt": {"content": "$1"}}},
-  "summaryZip": {"message": "Saves a ZIP archive: $FMT$", "placeholders": {"fmt": {"content": "$1"}}},
-  "summaryZipMedia": {"message": "Saves a ZIP archive: $FMT$ + media", "placeholders": {"fmt": {"content": "$1"}}},
-  "summaryNoFormat": {"message": "Choose at least one format"},
   "noFormat": {"message": "Choose at least one format."},
   "noDates": {"message": "Set at least one date."},
   "badRange": {"message": "The start date must be before the end date."},

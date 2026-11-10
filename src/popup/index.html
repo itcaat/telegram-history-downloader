@@ -23,7 +23,7 @@
       <svg class="icon"><use href="#i-telegram"/></svg>
     </div>
     <div class="header-text">
-      <h1 id="chat-title" class="title" data-i18n="extName"></h1>
+      <h1 id="chat-title" class="title" data-i18n="appName"></h1>
       <p id="chat-kind" class="subtitle"></p>
     </div>
   </header>
@@ -57,27 +57,20 @@
               <span data-i18n="rangeLast"></span>
             </label>
             <div id="last-extra" class="option-extra" hidden>
-              <label class="field">
+              <label class="field inline">
                 <span class="field-label" data-i18n="lastCount"></span>
-                <span class="input-wrap">
-                  <input type="number" id="last-count" min="1" step="1" value="1000" inputmode="numeric">
-                </span>
+                <input type="number" id="last-count" min="1" step="1" value="1000" inputmode="numeric">
               </label>
             </div>
             <label class="option">
               <input type="radio" name="range" value="dates">
               <span data-i18n="rangeDates"></span>
             </label>
-            <div id="dates" class="option-extra two-cols" hidden>
-              <label class="field">
-                <span class="field-label" data-i18n="dateFrom"></span>
-                <input type="date" id="date-from">
-              </label>
-              <label class="field">
-                <span class="field-label" data-i18n="dateTo"></span>
-                <input type="date" id="date-to">
-              </label>
-              <p class="field-hint full" data-i18n="datesHint"></p>
+            <div id="dates" class="option-extra dates" hidden>
+              <label class="field-label" for="date-from" data-i18n="dateFrom"></label>
+              <input type="date" id="date-from">
+              <label class="field-label" for="date-to" data-i18n="dateTo"></label>
+              <input type="date" id="date-to">
             </div>
           </div>
         </section>
@@ -99,11 +92,11 @@
           <div class="chips">
             <label class="chip"><input type="checkbox" name="media" value="photo"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaPhoto"></span></span></label>
             <label class="chip"><input type="checkbox" name="media" value="video"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaVideo"></span></span></label>
-            <label class="chip"><input type="checkbox" name="media" value="audio"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaAudio"></span></span></label>
             <label class="chip"><input type="checkbox" name="media" value="file"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaFile"></span></span></label>
+            <label class="chip"><input type="checkbox" name="media" value="audio"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaAudio"></span></span></label>
             <label class="chip"><input type="checkbox" name="media" value="sticker"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaSticker"></span></span></label>
           </div>
-          <div id="size-extra" class="card inset" hidden>
+          <div id="size-extra" class="size" hidden>
             <label class="field inline">
               <span class="field-label" data-i18n="maxFileSize"></span>
               <span class="input-wrap">
@@ -120,9 +113,8 @@
         <p id="form-error" class="form-error" role="alert" hidden></p>
         <button type="submit" id="start" class="button primary">
           <svg class="icon"><use href="#i-download"/></svg>
-          <span data-i18n="download"></span>
+          <span id="start-label" data-i18n="download"></span>
         </button>
-        <p id="summary" class="summary" aria-live="polite"></p>
       </footer>
     </form>
 

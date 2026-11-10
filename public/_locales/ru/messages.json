@@ -1,6 +1,7 @@
 {
-  "extName": {"message": "Telegram History Downloader"},
-  "extDescription": {"message": "Экспорт истории чатов, групп и каналов из Telegram Web (WebK) в JSON, HTML и Markdown."},
+  "extName": {"message": "Экспорт чатов для Telegram Web — HTML, JSON, MD"},
+  "appName": {"message": "Экспорт чатов для Telegram"},
+  "extDescription": {"message": "Экспорт истории чатов, групп и каналов из Telegram Web в HTML, JSON и Markdown. С фото, видео и файлами. Всё в вашем браузере."},
 
   "connecting": {"message": "Подключение к Telegram…"},
 
@@ -28,8 +29,7 @@
   "lastCount": {"message": "Количество сообщений"},
   "rangeDates": {"message": "За период"},
   "dateFrom": {"message": "С"},
-  "dateTo": {"message": "По (включительно)"},
-  "datesHint": {"message": "Можно указать только одну дату."},
+  "dateTo": {"message": "по"},
 
   "formatsTitle": {"message": "Формат"},
 
@@ -41,16 +41,13 @@
   "mediaFile": {"message": "Файлы"},
   "mediaSticker": {"message": "Стикеры"},
   "maxFileSize": {"message": "Не скачивать файлы больше"},
-  "maxFileSizeHint": {"message": "0 — без ограничений. Большие файлы будут пропущены."},
+  "maxFileSizeHint": {"message": "0 — без ограничений, большие файлы пропускаются"},
   "kb": {"message": "КБ"},
   "mb": {"message": "МБ"},
   "gb": {"message": "ГБ"},
 
+  "downloadAs": {"message": "Скачать $FMT$", "placeholders": {"fmt": {"content": "$1"}}},
   "download": {"message": "Скачать"},
-  "summaryFile": {"message": "Будет сохранён файл $FMT$", "placeholders": {"fmt": {"content": "$1"}}},
-  "summaryZip": {"message": "Будет сохранён ZIP-архив: $FMT$", "placeholders": {"fmt": {"content": "$1"}}},
-  "summaryZipMedia": {"message": "Будет сохранён ZIP-архив: $FMT$ + медиа", "placeholders": {"fmt": {"content": "$1"}}},
-  "summaryNoFormat": {"message": "Выберите хотя бы один формат"},
   "noFormat": {"message": "Выберите хотя бы один формат."},
   "noDates": {"message": "Укажите хотя бы одну дату."},
   "badRange": {"message": "Дата начала должна быть раньше даты окончания."},

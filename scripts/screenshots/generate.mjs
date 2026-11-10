@@ -125,7 +125,7 @@ function scenePage(lang, index) {
 <head><meta charset="utf-8"><link rel="stylesheet" href="/scene.css"></head>
 <body>
   <section class="copy">
-    <div class="brand"><img src="/icon.png" alt="">${esc(messages[lang].extName.message)}</div>
+    <div class="brand"><img src="/icon.png" alt="">${esc(messages[lang].appName.message)}</div>
     <h1>${esc(title)}</h1>
     <p class="lead">${esc(lead)}</p>
     ${extra}
@@ -165,7 +165,7 @@ const PROMOS = [
 ];
 
 function promoPage(name) {
-  const title = esc(messages.en.extName.message);
+  const title = esc(messages.en.appName.message);
   const pills = '<div class="pills"><span class="pill">HTML</span><span class="pill">JSON</span><span class="pill">Markdown</span></div>';
   const head = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="/promo.css"></head>';
 
@@ -184,9 +184,9 @@ function promoPage(name) {
       ${pills}
     </section>
     ${popupFrame('en', popupConfigs('en')[0])}
-    ${file(724, 120, '#ff8a5c', 'HTML', 'messages.html', '12,400 messages')}
-    ${file(760, 236, '#4fae4e', 'JSON', 'messages.json', 'Structured data')}
-    ${file(712, 352, '#8774e1', 'ZIP', fileName('en'), '380 media files')}
+    ${file(700, 120, '#ff8a5c', 'HTML', 'messages.html', '12,400 messages')}
+    ${file(736, 236, '#4fae4e', 'JSON', 'messages.json', 'Structured data')}
+    ${file(688, 352, '#8774e1', 'ZIP', fileName('en'), '380 media files')}
     <script>
       const frame = document.querySelector('.popup');
       setInterval(() => {

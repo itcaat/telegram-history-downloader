@@ -180,7 +180,7 @@ h1 {
 }
 
 .bubble {
-  max-width: 290px;
+  max-width: 276px;
   padding: 7px 12px 8px;
   border-radius: 14px 14px 14px 4px;
   background: #212121;
@@ -192,7 +192,7 @@ h1 {
 .bubble b.c2 { color: #ffa65c; }
 .bubble b.c3 { color: #6fdc8c; }
 .bubble b.c4 { color: #e388f2; }
-.bubble.out { align-self: flex-start; margin-left: 24px; background: #766ac8; border-radius: 14px 14px 4px 14px; }
+.bubble.out { align-self: flex-start; margin-left: 20px; background: #766ac8; border-radius: 14px 14px 4px 14px; }
 .bubble small { float: right; margin: 6px 0 -4px 10px; color: rgb(255 255 255 / 55%); font-size: 12px; }
 
 /* ---------- popup ---------- */
@@ -201,7 +201,7 @@ h1 {
   position: absolute;
   top: 6px;
   right: 10px;
-  width: 360px;
+  width: 380px;
   height: 600px;
   border: 0;
   border-radius: 10px;
