@@ -5,68 +5,173 @@
   <link rel="stylesheet" href="./popup.css">
 </head>
 <body>
-  <header>
-    <div id="chat-title" class="title" data-i18n="extName"></div>
-    <div id="chat-kind" class="muted"></div>
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <symbol id="i-telegram" viewBox="0 0 24 24"><path fill="currentColor" d="M21.4 4.3 2.9 11.4c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.5l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8l3.1-14.7c.3-1.3-.5-1.9-1.5-1.3ZM17.6 8l-8 7.2-.3 3.3-1.5-4.8L17 7.4c.5-.3.9 0 .6.6Z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 12a8 8 0 0 1-11.8 7L4 20l1-4.2A8 8 0 1 1 20 12Z"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9 2v5m6-5v5M6 7h12v4a6 6 0 0 1-12 0V7Zm6 10v5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path fill="currentColor" d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1Z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></g></symbol>
+  </svg>
+
+  <header class="header">
+    <div id="avatar" class="avatar" aria-hidden="true">
+      <svg class="icon"><use href="#i-telegram"/></svg>
+    </div>
+    <div class="header-text">
+      <h1 id="chat-title" class="title" data-i18n="extName"></h1>
+      <p id="chat-kind" class="subtitle"></p>
+    </div>
   </header>
 
-  <section id="message" class="message" hidden>
-    <p id="message-text"></p>
-    <a id="open-webk" href="https://web.telegram.org/k/" target="_blank" data-i18n="openWebK" hidden></a>
-  </section>
+  <main>
+    <section id="loading" class="state" aria-busy="true">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="state-text" data-i18n="connecting"></p>
+    </section>
 
-  <form id="options" hidden>
-    <fieldset>
-      <legend data-i18n="rangeTitle"></legend>
-      <label><input type="radio" name="range" value="all" checked> <span data-i18n="rangeAll"></span></label>
-      <label class="inline">
-        <input type="radio" name="range" value="last"> <span data-i18n="rangeLast"></span>
-        <input type="number" id="last-count" min="1" step="1" value="1000">
-      </label>
-      <label><input type="radio" name="range" value="dates"> <span data-i18n="rangeDates"></span></label>
-      <div id="dates" class="dates">
-        <label><span data-i18n="dateFrom"></span> <input type="date" id="date-from"></label>
-        <label><span data-i18n="dateTo"></span> <input type="date" id="date-to"></label>
+    <section id="message" class="state" role="status" hidden>
+      <div id="message-icon" class="state-icon" aria-hidden="true">
+        <svg class="icon"><use href="#i-chat"/></svg>
       </div>
-    </fieldset>
+      <h2 id="message-title" class="state-title"></h2>
+      <p id="message-text" class="state-text"></p>
+      <a id="open-webk" class="button primary" href="https://web.telegram.org/k/" target="_blank" data-i18n="openWebK" hidden></a>
+    </section>
 
-    <fieldset>
-      <legend data-i18n="formatsTitle"></legend>
-      <div class="row">
-        <label><input type="checkbox" name="format" value="json"> JSON</label>
-        <label><input type="checkbox" name="format" value="html" checked> HTML</label>
-        <label><input type="checkbox" name="format" value="md"> Markdown</label>
+    <form id="options" novalidate hidden>
+      <div class="content">
+        <section class="group" role="radiogroup" aria-labelledby="range-title">
+          <h2 id="range-title" class="group-title" data-i18n="rangeTitle"></h2>
+          <div class="card">
+            <label class="option">
+              <input type="radio" name="range" value="all" checked>
+              <span data-i18n="rangeAll"></span>
+            </label>
+            <label class="option">
+              <input type="radio" name="range" value="last">
+              <span data-i18n="rangeLast"></span>
+            </label>
+            <div id="last-extra" class="option-extra" hidden>
+              <label class="field">
+                <span class="field-label" data-i18n="lastCount"></span>
+                <span class="input-wrap">
+                  <input type="number" id="last-count" min="1" step="1" value="1000" inputmode="numeric">
+                </span>
+              </label>
+            </div>
+            <label class="option">
+              <input type="radio" name="range" value="dates">
+              <span data-i18n="rangeDates"></span>
+            </label>
+            <div id="dates" class="option-extra two-cols" hidden>
+              <label class="field">
+                <span class="field-label" data-i18n="dateFrom"></span>
+                <input type="date" id="date-from">
+              </label>
+              <label class="field">
+                <span class="field-label" data-i18n="dateTo"></span>
+                <input type="date" id="date-to">
+              </label>
+              <p class="field-hint full" data-i18n="datesHint"></p>
+            </div>
+          </div>
+        </section>
+
+        <section class="group" role="group" aria-labelledby="formats-title">
+          <h2 id="formats-title" class="group-title" data-i18n="formatsTitle"></h2>
+          <div id="formats" class="chips">
+            <label class="chip"><input type="checkbox" name="format" value="html" checked><span><svg class="icon"><use href="#i-check"/></svg>HTML</span></label>
+            <label class="chip"><input type="checkbox" name="format" value="json"><span><svg class="icon"><use href="#i-check"/></svg>JSON</span></label>
+            <label class="chip"><input type="checkbox" name="format" value="md"><span><svg class="icon"><use href="#i-check"/></svg>Markdown</span></label>
+          </div>
+        </section>
+
+        <section class="group" role="group" aria-labelledby="media-title">
+          <h2 id="media-title" class="group-title">
+            <span data-i18n="mediaTitle"></span>
+            <span class="group-note" data-i18n="optional"></span>
+          </h2>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="media" value="photo"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaPhoto"></span></span></label>
+            <label class="chip"><input type="checkbox" name="media" value="video"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaVideo"></span></span></label>
+            <label class="chip"><input type="checkbox" name="media" value="audio"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaAudio"></span></span></label>
+            <label class="chip"><input type="checkbox" name="media" value="file"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaFile"></span></span></label>
+            <label class="chip"><input type="checkbox" name="media" value="sticker"><span><svg class="icon"><use href="#i-check"/></svg><span data-i18n="mediaSticker"></span></span></label>
+          </div>
+          <div id="size-extra" class="card inset" hidden>
+            <label class="field inline">
+              <span class="field-label" data-i18n="maxFileSize"></span>
+              <span class="input-wrap">
+                <input type="number" id="max-size" min="0" step="1" value="50" inputmode="numeric" aria-describedby="max-size-hint">
+                <span class="suffix" data-i18n="mb"></span>
+              </span>
+            </label>
+            <p id="max-size-hint" class="field-hint" data-i18n="maxFileSizeHint"></p>
+          </div>
+        </section>
       </div>
-    </fieldset>
 
-    <fieldset>
-      <legend data-i18n="mediaTitle"></legend>
-      <div class="grid">
-        <label><input type="checkbox" name="media" value="photo"> <span data-i18n="mediaPhoto"></span></label>
-        <label><input type="checkbox" name="media" value="video"> <span data-i18n="mediaVideo"></span></label>
-        <label><input type="checkbox" name="media" value="audio"> <span data-i18n="mediaAudio"></span></label>
-        <label><input type="checkbox" name="media" value="file"> <span data-i18n="mediaFile"></span></label>
-        <label><input type="checkbox" name="media" value="sticker"> <span data-i18n="mediaSticker"></span></label>
+      <footer class="footer">
+        <p id="form-error" class="form-error" role="alert" hidden></p>
+        <button type="submit" id="start" class="button primary">
+          <svg class="icon"><use href="#i-download"/></svg>
+          <span data-i18n="download"></span>
+        </button>
+        <p id="summary" class="summary" aria-live="polite"></p>
+      </footer>
+    </form>
+
+    <section id="progress" class="progress" hidden>
+      <div class="progress-head">
+        <div id="status-icon" class="status-icon" aria-hidden="true"></div>
+        <div class="progress-head-text">
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+          <p id="elapsed" class="subtitle"></p>
+        </div>
+        <span id="percent" class="percent"></span>
       </div>
-      <label class="inline">
-        <span data-i18n="maxFileSize"></span>
-        <input type="number" id="max-size" min="0" step="1" value="50">
-      </label>
-      <p class="muted small" data-i18n="zipHint"></p>
-    </fieldset>
 
-    <p id="form-error" class="error" hidden></p>
-    <button type="submit" id="start" class="primary" data-i18n="download"></button>
-  </form>
+      <div id="bar" class="bar" role="progressbar" aria-labelledby="status" aria-valuemin="0" aria-valuemax="100">
+        <div id="bar-fill" class="bar-fill"></div>
+      </div>
 
-  <section id="progress" hidden>
-    <div class="bar"><div id="bar-fill"></div></div>
-    <p id="status" class="status"></p>
-    <p id="details" class="muted small"></p>
-    <p id="bg-hint" class="muted small" data-i18n="backgroundHint"></p>
-    <button type="button" id="cancel" data-i18n="cancel"></button>
-    <button type="button" id="reset" class="primary" data-i18n="newExport" hidden></button>
-  </section>
+      <dl class="stats">
+        <div class="stat">
+          <dt data-i18n="statMessages"></dt>
+          <dd id="stat-messages">0</dd>
+        </div>
+        <div class="stat">
+          <dt data-i18n="statMedia"></dt>
+          <dd id="stat-media">0</dd>
+        </div>
+        <div id="stat-skipped-wrap" class="stat" hidden>
+          <dt data-i18n="statSkipped"></dt>
+          <dd id="stat-skipped">0</dd>
+        </div>
+        <div id="stat-failed-wrap" class="stat warn" hidden>
+          <dt data-i18n="statFailed"></dt>
+          <dd id="stat-failed">0</dd>
+        </div>
+      </dl>
+
+      <p id="error-text" class="callout error" hidden></p>
+      <p id="file-name" class="callout success" hidden></p>
+      <p id="bg-hint" class="callout">
+        <svg class="icon"><use href="#i-info"/></svg>
+        <span data-i18n="backgroundHint"></span>
+      </p>
+
+      <div class="actions">
+        <button type="button" id="cancel" class="button danger" data-i18n="cancel"></button>
+        <button type="button" id="reset" class="button primary" hidden></button>
+      </div>
+    </section>
+  </main>
 
   <script type="module" src="./popup.ts"></script>
 </body>

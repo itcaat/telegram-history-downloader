@@ -1,4 +1,5 @@
 import type {
+  ChatInfo,
   Command,
   ExportFormat,
   ExportOptions,
@@ -21,38 +22,90 @@ interface StoredForm {
   maxSize: number;
 }
 
+type MessageKind = 'notTelegram' | 'wrongVersion' | 'notReady' | 'noChat' | 'connectError';
+
 const POLL_MS = 700;
 const STORAGE_KEY = 'form';
+
+const FORMAT_NAMES: Record<ExportFormat, string> = {html: 'HTML', json: 'JSON', md: 'Markdown'};
+
+const MESSAGE_ICONS: Record<MessageKind, string> = {
+  notTelegram: 'i-telegram',
+  wrongVersion: 'i-telegram',
+  notReady: 'i-clock',
+  noChat: 'i-chat',
+  connectError: 'i-plug'
+};
+
+const STATUS_ICONS: Partial<Record<JobState['status'], string>> = {
+  done: 'i-check',
+  error: 'i-x',
+  cancelled: 'i-stop'
+};
+
+// Telegram avatar palette
+const AVATAR_COLORS: [string, string][] = [
+  ['#ff885e', '#ff516a'],
+  ['#ffcd6a', '#ffa85c'],
+  ['#82b1ff', '#665fff'],
+  ['#a0de7e', '#54cb68'],
+  ['#53edd6', '#28c9b7'],
+  ['#72d5fd', '#2a9ef1'],
+  ['#e0a2f3', '#d669ed']
+];
 
 const t = (key: string, subs?: string | string[]) => chrome.i18n.getMessage(key, subs) || key;
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const locale: Locale = chrome.i18n.getUILanguage().toLowerCase().startsWith('ru') ? 'ru' : 'en';
+const numberFormat = new Intl.NumberFormat(locale);
+const fmtNum = (n: number) => numberFormat.format(n);
+const iconHtml = (id: string) => `<svg class="icon"><use href="#${id}"/></svg>`;
 
 const els = {
+  avatar: $('avatar'),
   title: $('chat-title'),
   kind: $('chat-kind'),
+  loading: $('loading'),
   message: $('message'),
+  messageIcon: $('message-icon'),
+  messageTitle: $('message-title'),
   messageText: $('message-text'),
   openWebK: $('open-webk'),
   form: $<HTMLFormElement>('options'),
+  lastExtra: $('last-extra'),
   lastCount: $<HTMLInputElement>('last-count'),
   dates: $('dates'),
   dateFrom: $<HTMLInputElement>('date-from'),
   dateTo: $<HTMLInputElement>('date-to'),
+  formats: $('formats'),
+  sizeExtra: $('size-extra'),
   maxSize: $<HTMLInputElement>('max-size'),
   formError: $('form-error'),
   start: $<HTMLButtonElement>('start'),
+  summary: $('summary'),
   progress: $('progress'),
-  bar: document.querySelector<HTMLElement>('.bar')!,
-  barFill: $('bar-fill'),
+  statusIcon: $('status-icon'),
   status: $('status'),
-  details: $('details'),
+  elapsed: $('elapsed'),
+  percent: $('percent'),
+  bar: $('bar'),
+  barFill: $('bar-fill'),
+  statMessages: $('stat-messages'),
+  statMedia: $('stat-media'),
+  statSkippedWrap: $('stat-skipped-wrap'),
+  statSkipped: $('stat-skipped'),
+  statFailedWrap: $('stat-failed-wrap'),
+  statFailed: $('stat-failed'),
+  errorText: $('error-text'),
+  fileName: $('file-name'),
   bgHint: $('bg-hint'),
   cancel: $<HTMLButtonElement>('cancel'),
   reset: $<HTMLButtonElement>('reset')
 };
 
 let tabId: number | undefined;
+let lastStatus: JobState['status'] | undefined;
+let headerKey: string | undefined;
 
 // ---------- i18n ----------
 
@@ -127,10 +180,29 @@ function writeForm(form: Partial<StoredForm>) {
   updateFormState();
 }
 
+const toInputDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
 function updateFormState() {
-  const {range} = readForm();
-  els.dates.classList.toggle('disabled', range !== 'dates');
-  els.lastCount.disabled = range !== 'last';
+  const form = readForm();
+  els.lastExtra.hidden = form.range !== 'last';
+  els.dates.hidden = form.range !== 'dates';
+  els.sizeExtra.hidden = !form.media.length;
+
+  const today = toInputDate(new Date());
+  els.dateFrom.max = form.to || today;
+  els.dateTo.min = form.from;
+  els.dateTo.max = today;
+
+  els.summary.textContent = summaryText(form);
+}
+
+function summaryText(form: StoredForm) {
+  if(!form.formats.length) return t('summaryNoFormat');
+  const names = form.formats.map((f) => FORMAT_NAMES[f]).join(', ');
+  if(form.media.length) return t('summaryZipMedia', names);
+  if(form.formats.length > 1) return t('summaryZip', names);
+  return t('summaryFile', names);
 }
 
 const parseDay = (value: string, nextDay = false) => {
@@ -139,8 +211,13 @@ const parseDay = (value: string, nextDay = false) => {
   return Math.floor(new Date(y, m - 1, d + (nextDay ? 1 : 0)).getTime() / 1000);
 };
 
-function buildOptions(form: StoredForm): ExportOptions | string {
-  if(!form.formats.length) return t('noFormat');
+interface FormError {
+  text: string;
+  invalid: HTMLElement[];
+}
+
+function buildOptions(form: StoredForm): ExportOptions | FormError {
+  if(!form.formats.length) return {text: t('noFormat'), invalid: [els.formats]};
 
   let range: ExportRange;
   if(form.range === 'last') {
@@ -148,7 +225,8 @@ function buildOptions(form: StoredForm): ExportOptions | string {
   } else if(form.range === 'dates') {
     const from = parseDay(form.from);
     const to = parseDay(form.to, true);
-    if((!from && !to) || (from && to && from >= to)) return t('badRange');
+    if(!from && !to) return {text: t('noDates'), invalid: [els.dateFrom, els.dateTo]};
+    if(from && to && from >= to) return {text: t('badRange'), invalid: [els.dateFrom, els.dateTo]};
     range = {mode: 'dates', from, to};
   } else {
     range = {mode: 'all'};
@@ -157,42 +235,77 @@ function buildOptions(form: StoredForm): ExportOptions | string {
   return {range, formats: form.formats, media: form.media, maxFileSizeMb: form.maxSize, locale};
 }
 
-els.form.addEventListener('change', () => {
-  updateFormState();
+function clearFormError() {
   els.formError.hidden = true;
+  els.formats.classList.remove('invalid');
+  for(const input of els.form.querySelectorAll('[aria-invalid]')) input.removeAttribute('aria-invalid');
+}
+
+function showFormError(error: FormError) {
+  clearFormError();
+  els.formError.textContent = error.text;
+  els.formError.hidden = false;
+
+  for(const el of error.invalid) {
+    if(el instanceof HTMLInputElement) el.setAttribute('aria-invalid', 'true');
+    else el.classList.add('invalid');
+  }
+
+  const first = error.invalid[0];
+  const focusTarget = first instanceof HTMLInputElement ? first : first?.querySelector('input');
+  focusTarget?.focus();
+}
+
+els.form.addEventListener('change', (event) => {
+  updateFormState();
+  clearFormError();
   void chrome.storage.local.set({[STORAGE_KEY]: readForm()});
+
+  // Move focus to the field that has just been revealed.
+  const target = event.target as HTMLInputElement;
+  if(target.name === 'range' && target.checked) {
+    if(target.value === 'last') els.lastCount.focus();
+    else if(target.value === 'dates') els.dateFrom.focus();
+  }
 });
 
 els.form.addEventListener('submit', async(event) => {
   event.preventDefault();
   const options = buildOptions(readForm());
-  if(typeof options === 'string') {
+  if('text' in options) {
     showFormError(options);
     return;
   }
 
-  els.start.disabled = true;
+  setBusy(els.start, true);
   try {
     render(await send({type: 'start', options}));
   } catch(err) {
-    showFormError(errorText(err));
+    showFormError({text: errorText(err), invalid: []});
   } finally {
-    els.start.disabled = false;
+    setBusy(els.start, false);
   }
 });
 
-els.cancel.addEventListener('click', async() => {
-  els.cancel.disabled = true;
-  render(await send({type: 'cancel'}));
-});
+els.cancel.addEventListener('click', () => runAction(els.cancel, {type: 'cancel'}));
+els.reset.addEventListener('click', () => runAction(els.reset, {type: 'reset'}));
 
-els.reset.addEventListener('click', async() => {
-  render(await send({type: 'reset'}));
-});
+async function runAction(button: HTMLButtonElement, command: Command) {
+  setBusy(button, true);
+  try {
+    render(await send(command));
+  } catch(err) {
+    els.errorText.textContent = errorText(err);
+    els.errorText.hidden = false;
+  } finally {
+    setBusy(button, false);
+  }
+}
 
-function showFormError(text: string) {
-  els.formError.textContent = text;
-  els.formError.hidden = false;
+function setBusy(button: HTMLButtonElement, busy: boolean) {
+  button.disabled = busy;
+  button.classList.toggle('busy', busy);
+  button.setAttribute('aria-busy', String(busy));
 }
 
 function errorText(err: unknown) {
@@ -204,97 +317,158 @@ function errorText(err: unknown) {
 
 // ---------- rendering ----------
 
-function showMessage(text: string, withLink = false) {
-  els.message.hidden = false;
-  els.messageText.textContent = text;
-  els.openWebK.hidden = !withLink;
-  els.form.hidden = true;
-  els.progress.hidden = true;
+type View = 'loading' | 'message' | 'form' | 'progress';
+
+function showView(view: View) {
+  els.loading.hidden = view !== 'loading';
+  els.message.hidden = view !== 'message';
+  els.form.hidden = view !== 'form';
+  els.progress.hidden = view !== 'progress';
+}
+
+function showMessage(kind: MessageKind) {
+  showView('message');
+  els.messageIcon.innerHTML = iconHtml(MESSAGE_ICONS[kind]);
+  els.messageIcon.classList.toggle('danger', kind === 'connectError');
+  els.messageTitle.textContent = t(`${kind}Title`);
+  els.messageText.textContent = t(kind);
+  els.openWebK.hidden = kind !== 'notTelegram' && kind !== 'wrongVersion';
+}
+
+function initials(title: string) {
+  const words = title.trim().split(/\s+/).filter((w) => /\p{L}|\p{N}/u.test(w));
+  return words.slice(0, 2).map((w) => [...w.replace(/[^\p{L}\p{N}]/gu, '')][0] ?? '').join('').toUpperCase();
+}
+
+function renderHeader(chat: ChatInfo | null) {
+  const key = chat ? `${chat.peerId}|${chat.title}|${chat.kind}|${chat.username ?? ''}` : '';
+  if(key === headerKey) return;
+  headerKey = key;
+
+  if(!chat) {
+    els.title.textContent = t('extName');
+    els.kind.textContent = '';
+    els.kind.hidden = true;
+    els.avatar.style.removeProperty('--c1');
+    els.avatar.style.removeProperty('--c2');
+    els.avatar.innerHTML = iconHtml('i-telegram');
+    return;
+  }
+
+  els.title.textContent = chat.title;
+  els.title.title = chat.title;
+  els.kind.textContent = t(`kind_${chat.kind}`) + (chat.username ? ` · @${chat.username}` : '');
+  els.kind.hidden = false;
+
+  const [c1, c2] = chat.kind === 'saved' ?
+    AVATAR_COLORS[5] :
+    AVATAR_COLORS[Math.abs(chat.peerId) % AVATAR_COLORS.length];
+  els.avatar.style.setProperty('--c1', c1);
+  els.avatar.style.setProperty('--c2', c2);
+
+  const text = chat.kind === 'saved' ? '' : initials(chat.title);
+  if(text) els.avatar.textContent = text;
+  else els.avatar.innerHTML = iconHtml(chat.kind === 'saved' ? 'i-bookmark' : 'i-chat');
 }
 
 function formatBytes(bytes: number) {
-  if(bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  if(bytes < 1024 ** 3) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
+  if(bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} ${t('kb')}`;
+  if(bytes < 1024 ** 3) return `${(bytes / 1024 / 1024).toFixed(1)} ${t('mb')}`;
+  return `${(bytes / 1024 ** 3).toFixed(2)} ${t('gb')}`;
+}
+
+function formatDuration(ms: number) {
+  const total = Math.max(0, Math.round(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = String(total % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
 }
 
 function renderJob(job: JobState) {
-  els.message.hidden = true;
-  els.form.hidden = true;
-  els.progress.hidden = false;
+  showView('progress');
 
   const running = job.status === 'running';
   els.cancel.hidden = !running;
-  els.cancel.disabled = false;
   els.reset.hidden = running;
+  els.reset.textContent = t(job.status === 'done' ? 'newExport' : 'backToSettings');
   els.bgHint.hidden = !running;
+
+  if(job.status !== lastStatus) {
+    els.statusIcon.dataset.status = job.status;
+    els.statusIcon.innerHTML = STATUS_ICONS[job.status] ? iconHtml(STATUS_ICONS[job.status]!) : '';
+    els.bar.dataset.status = job.status;
+    els.errorText.hidden = true;
+    // Keep keyboard focus on a visible action when the job finishes.
+    if(lastStatus === 'running' && document.activeElement === els.cancel) els.reset.focus();
+    lastStatus = job.status;
+  }
 
   let percent: number | undefined;
   if(job.status === 'done' || job.phase === 'packing') percent = 100;
   else if(job.messagesTotal) percent = Math.min(100, (job.messagesFetched / job.messagesTotal) * 100);
+
   els.bar.classList.toggle('indeterminate', running && percent === undefined);
   els.barFill.style.width = percent === undefined ? '' : `${percent}%`;
-
-  switch(job.status) {
-    case 'running':
-      els.status.textContent = t(`phase_${job.phase}`);
-      break;
-    case 'done':
-      els.status.textContent = t('status_done');
-      break;
-    case 'cancelled':
-      els.status.textContent = t('status_cancelled');
-      break;
-    case 'error':
-      els.status.textContent = t('status_error', job.error ?? '');
-      break;
+  if(percent === undefined) {
+    els.bar.removeAttribute('aria-valuenow');
+    els.percent.textContent = '';
+  } else {
+    els.bar.setAttribute('aria-valuenow', String(Math.round(percent)));
+    els.percent.textContent = running && job.phase === 'messages' ? `${Math.floor(percent)}%` : '';
   }
 
-  const total = job.messagesTotal !== undefined ? ` / ${job.messagesTotal}` : '';
-  const details = [t('progressMessages', `${job.messagesFetched}${total}`)];
-  if(job.mediaDone || job.mediaFailed) {
-    let media = t('progressMedia', `${job.mediaDone} (${formatBytes(job.bytes)})`);
-    if(job.mediaFailed) media += `, ${t('progressFailed', String(job.mediaFailed))}`;
-    details.push(media);
+  els.status.textContent = running ? t(`phase_${job.phase}`) : t(`status_${job.status}`);
+  els.elapsed.textContent = t(running ? 'elapsed' : 'tookTime', formatDuration((job.finishedAt ?? Date.now()) - job.startedAt));
+
+  els.statMessages.textContent = fmtNum(job.messagesFetched) +
+    (job.messagesTotal !== undefined ? ` / ${fmtNum(job.messagesTotal)}` : '');
+  els.statMedia.textContent = job.mediaDone ?
+    `${fmtNum(job.mediaDone)} · ${formatBytes(job.bytes)}` :
+    '0';
+  els.statSkippedWrap.hidden = !job.mediaSkipped;
+  els.statSkipped.textContent = fmtNum(job.mediaSkipped);
+  els.statFailedWrap.hidden = !job.mediaFailed;
+  els.statFailed.textContent = fmtNum(job.mediaFailed);
+
+  if(job.status === 'error') {
+    els.errorText.textContent = job.error ?? t('unknownError');
+    els.errorText.hidden = false;
   }
-  if(job.fileName && job.status === 'done') details.push(job.fileName);
-  els.details.textContent = details.join(' · ');
+
+  els.fileName.hidden = !(job.status === 'done' && job.fileName);
+  if(job.fileName) els.fileName.textContent = t('savedAs', job.fileName);
 }
 
 function render(state: PageState) {
-  const chat = state.job?.chat ?? state.chat;
-  if(chat) {
-    els.title.textContent = chat.title;
-    els.kind.textContent = t(`kind_${chat.kind}`) + (chat.username ? ` · @${chat.username}` : '');
-  }
+  renderHeader(state.job?.chat ?? state.chat);
 
   if(state.job) {
     renderJob(state.job);
     return;
   }
 
+  lastStatus = undefined;
+
   if(!state.ready) {
-    showMessage(t('notReady'));
+    showMessage('notReady');
     return;
   }
 
   if(!state.chat) {
-    els.title.textContent = t('extName');
-    els.kind.textContent = '';
-    showMessage(t('noChat'));
+    showMessage('noChat');
     return;
   }
 
-  els.message.hidden = true;
-  els.progress.hidden = true;
-  els.form.hidden = false;
+  showView('form');
 }
 
 async function poll() {
   try {
     render(await send({type: 'getState'}));
   } catch {
-    showMessage(t('connectError'));
+    renderHeader(null);
+    showMessage('connectError');
   }
   setTimeout(poll, POLL_MS);
 }
@@ -309,12 +483,12 @@ async function init() {
   const url = tab?.url ? new URL(tab.url) : undefined;
 
   if(!tab?.id || url?.hostname !== 'web.telegram.org') {
-    showMessage(t('notTelegram'), true);
+    showMessage('notTelegram');
     return;
   }
 
   if(!url.pathname.startsWith('/k')) {
-    showMessage(t('wrongVersion'), true);
+    showMessage('wrongVersion');
     return;
   }
 
