@@ -1,0 +1,51 @@
+{
+  "extName": {"message": "Telegram History Downloader"},
+  "extDescription": {"message": "Экспорт истории чатов, групп и каналов из Telegram Web (WebK) в JSON, HTML и Markdown."},
+
+  "notTelegram": {"message": "Откройте чат на web.telegram.org/k/ и снова нажмите на расширение."},
+  "wrongVersion": {"message": "Поддерживается только версия WebK. Переключитесь на web.telegram.org/k/ в настройках Telegram или откройте ссылку."},
+  "openWebK": {"message": "Открыть web.telegram.org/k/"},
+  "notReady": {"message": "Telegram ещё загружается или вы не авторизованы. Подождите и попробуйте снова."},
+  "noChat": {"message": "Сначала выберите чат, группу или канал в Telegram."},
+  "connectError": {"message": "Не удалось подключиться к вкладке Telegram. Перезагрузите страницу и попробуйте снова."},
+
+  "kind_user": {"message": "Личный чат"},
+  "kind_bot": {"message": "Бот"},
+  "kind_group": {"message": "Группа"},
+  "kind_channel": {"message": "Канал"},
+  "kind_saved": {"message": "Избранное"},
+
+  "rangeTitle": {"message": "Сообщения"},
+  "rangeAll": {"message": "Вся история"},
+  "rangeLast": {"message": "Последние N сообщений"},
+  "rangeDates": {"message": "Диапазон дат"},
+  "dateFrom": {"message": "С"},
+  "dateTo": {"message": "По"},
+
+  "formatsTitle": {"message": "Форматы"},
+
+  "mediaTitle": {"message": "Медиа"},
+  "mediaPhoto": {"message": "Фото"},
+  "mediaVideo": {"message": "Видео и GIF"},
+  "mediaAudio": {"message": "Голосовые и аудио"},
+  "mediaFile": {"message": "Файлы"},
+  "mediaSticker": {"message": "Стикеры"},
+  "maxFileSize": {"message": "Макс. размер файла, МБ (0 — без ограничений)"},
+  "zipHint": {"message": "Если выбраны медиа или несколько форматов, результат будет в ZIP-архиве."},
+
+  "download": {"message": "Скачать"},
+  "cancel": {"message": "Отмена"},
+  "newExport": {"message": "Новый экспорт"},
+  "noFormat": {"message": "Выберите хотя бы один формат."},
+  "badRange": {"message": "Проверьте диапазон сообщений."},
+
+  "phase_messages": {"message": "Загрузка сообщений…"},
+  "phase_packing": {"message": "Сборка файлов…"},
+  "status_done": {"message": "Готово! Файл сохранён."},
+  "status_cancelled": {"message": "Отменено."},
+  "status_error": {"message": "Ошибка: $ERR$", "placeholders": {"err": {"content": "$1"}}},
+  "progressMessages": {"message": "Сообщений: $N$", "placeholders": {"n": {"content": "$1"}}},
+  "progressMedia": {"message": "Медиа: $N$", "placeholders": {"n": {"content": "$1"}}},
+  "progressFailed": {"message": "ошибок: $N$", "placeholders": {"n": {"content": "$1"}}},
+  "backgroundHint": {"message": "Окно можно закрыть: экспорт продолжится, пока открыта вкладка Telegram."}
+}

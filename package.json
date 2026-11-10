@@ -1,0 +1,20 @@
+{
+  "name": "telegram-history-downloader",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chrome extension to export chat/channel history from web.telegram.org/k/",
+  "scripts": {
+    "build": "npm run typecheck && node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.7",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.7"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3"
+  }
+}

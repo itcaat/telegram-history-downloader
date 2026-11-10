@@ -1,0 +1,51 @@
+{
+  "extName": {"message": "Telegram History Downloader"},
+  "extDescription": {"message": "Export chat, group and channel history from Telegram Web (WebK) to JSON, HTML and Markdown."},
+
+  "notTelegram": {"message": "Open a chat at web.telegram.org/k/ and click the extension again."},
+  "wrongVersion": {"message": "Only the WebK version is supported. Switch to web.telegram.org/k/ in Telegram settings or open the link."},
+  "openWebK": {"message": "Open web.telegram.org/k/"},
+  "notReady": {"message": "Telegram is still loading or you are not logged in. Please wait and try again."},
+  "noChat": {"message": "Select a chat, group or channel in Telegram first."},
+  "connectError": {"message": "Can't connect to the Telegram tab. Reload the page and try again."},
+
+  "kind_user": {"message": "Private chat"},
+  "kind_bot": {"message": "Bot"},
+  "kind_group": {"message": "Group"},
+  "kind_channel": {"message": "Channel"},
+  "kind_saved": {"message": "Saved Messages"},
+
+  "rangeTitle": {"message": "Messages"},
+  "rangeAll": {"message": "Entire history"},
+  "rangeLast": {"message": "Last N messages"},
+  "rangeDates": {"message": "Date range"},
+  "dateFrom": {"message": "From"},
+  "dateTo": {"message": "To"},
+
+  "formatsTitle": {"message": "Formats"},
+
+  "mediaTitle": {"message": "Media"},
+  "mediaPhoto": {"message": "Photos"},
+  "mediaVideo": {"message": "Videos & GIFs"},
+  "mediaAudio": {"message": "Voice & audio"},
+  "mediaFile": {"message": "Files"},
+  "mediaSticker": {"message": "Stickers"},
+  "maxFileSize": {"message": "Max file size, MB (0 = no limit)"},
+  "zipHint": {"message": "With media or several formats the result is a ZIP archive."},
+
+  "download": {"message": "Download"},
+  "cancel": {"message": "Cancel"},
+  "newExport": {"message": "New export"},
+  "noFormat": {"message": "Choose at least one format."},
+  "badRange": {"message": "Check the message range."},
+
+  "phase_messages": {"message": "Loading messages…"},
+  "phase_packing": {"message": "Building files…"},
+  "status_done": {"message": "Done! The file has been saved."},
+  "status_cancelled": {"message": "Cancelled."},
+  "status_error": {"message": "Error: $ERR$", "placeholders": {"err": {"content": "$1"}}},
+  "progressMessages": {"message": "Messages: $N$", "placeholders": {"n": {"content": "$1"}}},
+  "progressMedia": {"message": "Media: $N$", "placeholders": {"n": {"content": "$1"}}},
+  "progressFailed": {"message": "failed: $N$", "placeholders": {"n": {"content": "$1"}}},
+  "backgroundHint": {"message": "You can close this window — the export continues while the Telegram tab stays open."}
+}

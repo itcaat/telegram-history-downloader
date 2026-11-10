@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="./popup.css">
+</head>
+<body>
+  <header>
+    <div id="chat-title" class="title" data-i18n="extName"></div>
+    <div id="chat-kind" class="muted"></div>
+  </header>
+
+  <section id="message" class="message" hidden>
+    <p id="message-text"></p>
+    <a id="open-webk" href="https://web.telegram.org/k/" target="_blank" data-i18n="openWebK" hidden></a>
+  </section>
+
+  <form id="options" hidden>
+    <fieldset>
+      <legend data-i18n="rangeTitle"></legend>
+      <label><input type="radio" name="range" value="all" checked> <span data-i18n="rangeAll"></span></label>
+      <label class="inline">
+        <input type="radio" name="range" value="last"> <span data-i18n="rangeLast"></span>
+        <input type="number" id="last-count" min="1" step="1" value="1000">
+      </label>
+      <label><input type="radio" name="range" value="dates"> <span data-i18n="rangeDates"></span></label>
+      <div id="dates" class="dates">
+        <label><span data-i18n="dateFrom"></span> <input type="date" id="date-from"></label>
+        <label><span data-i18n="dateTo"></span> <input type="date" id="date-to"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend data-i18n="formatsTitle"></legend>
+      <div class="row">
+        <label><input type="checkbox" name="format" value="json"> JSON</label>
+        <label><input type="checkbox" name="format" value="html" checked> HTML</label>
+        <label><input type="checkbox" name="format" value="md"> Markdown</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend data-i18n="mediaTitle"></legend>
+      <div class="grid">
+        <label><input type="checkbox" name="media" value="photo"> <span data-i18n="mediaPhoto"></span></label>
+        <label><input type="checkbox" name="media" value="video"> <span data-i18n="mediaVideo"></span></label>
+        <label><input type="checkbox" name="media" value="audio"> <span data-i18n="mediaAudio"></span></label>
+        <label><input type="checkbox" name="media" value="file"> <span data-i18n="mediaFile"></span></label>
+        <label><input type="checkbox" name="media" value="sticker"> <span data-i18n="mediaSticker"></span></label>
+      </div>
+      <label class="inline">
+        <span data-i18n="maxFileSize"></span>
+        <input type="number" id="max-size" min="0" step="1" value="50">
+      </label>
+      <p class="muted small" data-i18n="zipHint"></p>
+    </fieldset>
+
+    <p id="form-error" class="error" hidden></p>
+    <button type="submit" id="start" class="primary" data-i18n="download"></button>
+  </form>
+
+  <section id="progress" hidden>
+    <div class="bar"><div id="bar-fill"></div></div>
+    <p id="status" class="status"></p>
+    <p id="details" class="muted small"></p>
+    <p id="bg-hint" class="muted small" data-i18n="backgroundHint"></p>
+    <button type="button" id="cancel" data-i18n="cancel"></button>
+    <button type="button" id="reset" class="primary" data-i18n="newExport" hidden></button>
+  </section>
+
+  <script type="module" src="./popup.ts"></script>
+</body>
+</html>
