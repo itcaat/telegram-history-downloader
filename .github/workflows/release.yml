@@ -37,21 +37,22 @@ jobs:
 
       - run: npm ci
 
-      # Chrome only accepts numeric "version", so the full semver goes to "version_name".
-      - name: Set version
+      # Stable releases must have the version committed (make release does it),
+      # so the repo source matches what gets published to the Chrome Web Store.
+      - name: Check committed version
+        if: steps.version.outputs.prerelease == 'false'
         env:
           VERSION_FULL: ${{ steps.version.outputs.full }}
-          VERSION_CORE: ${{ steps.version.outputs.core }}
         run: |
-          npm version "$VERSION_FULL" --no-git-tag-version --allow-same-version
-          node -e '
-            const fs = require("node:fs");
-            const path = "public/manifest.json";
-            const manifest = JSON.parse(fs.readFileSync(path, "utf8"));
-            manifest.version = process.env.VERSION_CORE;
-            manifest.version_name = process.env.VERSION_FULL;
-            fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + "\n");
-          '
+          MANIFEST="$(node -p 'require("./public/manifest.json").version')"
+          PACKAGE="$(node -p 'require("./package.json").version')"
+          if [[ "$MANIFEST" != "$VERSION_FULL" || "$PACKAGE" != "$VERSION_FULL" ]]; then
+            echo "::error::Tag is v$VERSION_FULL, but manifest.json has $MANIFEST and package.json has $PACKAGE. Use 'make release' or commit the version before tagging."
+            exit 1
+          fi
+
+      - name: Set version
+        run: node scripts/set-version.mjs "${{ steps.version.outputs.full }}"
 
       - run: npm run build
 

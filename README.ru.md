@@ -70,9 +70,9 @@ make release BUMP=minor   # v1.2.3 → v1.3.0
 make release BUMP=major   # v1.2.3 → v2.0.0
 ```
 
-`make release` работает только из `main` с чистым рабочим деревом, синхронизированным с `origin/main`. Последний тег берётся из GitHub через `gh`, новый тег ставится на текущий коммит и пушится. Если тегов ещё нет, используется версия из `package.json`. Pre-release можно выпустить вручную: `git tag v1.2.3-beta.1 && git push origin v1.2.3-beta.1`.
+`make release` работает только из `main` с чистым рабочим деревом, синхронизированным с `origin/main`. Последний тег берётся из GitHub через `gh`, новая версия записывается в `package.json`, `package-lock.json` и `manifest.json` (`scripts/set-version.mjs`), коммитится и пушится в `main`, после чего на этот коммит ставится тег и пушится. Если тегов ещё нет, используется версия из `package.json`.
 
-Версия из тега проставляется в `package.json` и `manifest.json` (`version` — `1.2.3`, `version_name` — полная версия), а ZIP с расширением прикрепляется к GitHub Release.
+Для стабильных тегов Release workflow проверяет, что версии в закоммиченных `manifest.json` и `package.json` совпадают с тегом, и падает, если нет. Pre-release можно выпустить вручную, не коммитя версию: `git tag v1.2.3-beta.1 && git push origin v1.2.3-beta.1`. В этом случае CI проставит `version` — `1.2.3`, `version_name` — полную версию. ZIP с расширением прикрепляется к GitHub Release.
 
 ### Как это работает
 
