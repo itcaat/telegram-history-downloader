@@ -70,9 +70,9 @@ make release BUMP=minor   # v1.2.3 → v1.3.0
 make release BUMP=major   # v1.2.3 → v2.0.0
 ```
 
-`make release` only runs from `main` with a clean working tree in sync with `origin/main`. It takes the latest tag from GitHub via `gh`, tags the current commit and pushes the tag. If there are no tags yet, the version from `package.json` is used. A pre-release can be tagged manually: `git tag v1.2.3-beta.1 && git push origin v1.2.3-beta.1`.
+`make release` only runs from `main` with a clean working tree in sync with `origin/main`. It takes the latest tag from GitHub via `gh`, writes the new version to `package.json`, `package-lock.json` and `manifest.json` (`scripts/set-version.mjs`), commits and pushes it to `main`, then tags that commit and pushes the tag. If there are no tags yet, the version from `package.json` is used.
 
-The tag version is written to `package.json` and `manifest.json` (`version` is `1.2.3`, `version_name` is the full version), and the extension ZIP is attached to the GitHub Release.
+For stable tags the Release workflow checks that the committed `manifest.json` and `package.json` versions match the tag and fails otherwise. A pre-release can be tagged manually without committing the version: `git tag v1.2.3-beta.1 && git push origin v1.2.3-beta.1`. In that case CI sets `version` to `1.2.3` and `version_name` to the full version. The extension ZIP is attached to the GitHub Release.
 
 ### How it works
 

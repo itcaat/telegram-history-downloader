@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Creates the next semver tag on the current commit and pushes it.
+# Bumps the version in package.json and manifest.json, commits it to main,
+# then creates the next semver tag on that commit and pushes it.
 # Usage: scripts/release.sh [patch|minor|major]
 set -euo pipefail
 
@@ -52,9 +53,16 @@ if git rev-parse -q --verify "refs/tags/$NEXT" >/dev/null; then
   exit 1
 fi
 
-echo "New tag:    $NEXT on $(git rev-parse --short HEAD)"
+echo "New tag:    $NEXT (version commit on top of $(git rev-parse --short HEAD))"
 read -r -p "Create and push $NEXT? [y/N] " ANSWER
 [[ "$ANSWER" =~ ^[Yy]$ ]] || { echo "Aborted"; exit 1; }
+
+node scripts/set-version.mjs "$NEXT"
+git add package.json package-lock.json public/manifest.json
+if ! git diff --cached --quiet; then
+  git commit -m "Release $NEXT"
+  git push origin main
+fi
 
 git tag -a "$NEXT" -m "Release $NEXT"
 git push origin "$NEXT"

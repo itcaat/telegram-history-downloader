@@ -1,6 +1,6 @@
 {
   "name": "telegram-history-downloader",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "description": "Chrome extension to export chat/channel history from web.telegram.org/k/",
